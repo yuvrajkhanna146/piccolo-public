@@ -70,6 +70,11 @@ cd piccolo-public
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+
+ibapi (IBKR Python API) is not on PyPI — download the installer from:
+https://interactivebrokers.github.io/
+then: pip install <path-to-ibapi-wheel>
+
 ```
 
 ### 2. Configure Environment Variables
