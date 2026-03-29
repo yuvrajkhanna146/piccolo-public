@@ -1,0 +1,71 @@
+flowchart TB
+  %% STYLES
+  classDef source    fill:#3b82f6,stroke:#1e40af,stroke-width:2,color:#ffffff,font-weight:bold;
+  classDef db        fill:#059669,stroke:#047857,stroke-width:2,color:#ffffff,font-weight:bold;
+  classDef service   fill:#8b5cf6,stroke:#6d28d9,stroke-width:2,color:#ffffff,font-weight:bold;
+  classDef model     fill:#ec4899,stroke:#be185d,stroke-width:2,color:#ffffff,font-weight:bold;
+  classDef orch      fill:#f59e0b,stroke:#d97706,stroke-width:2,color:#ffffff,font-weight:bold;
+
+  %% ROW 1 — ORCHESTRATION
+  ORCH["🎯 run_daily_pipeline.py<br/><i>Daily Orchestrator</i>"]:::orch
+
+  %% ROW 2 — LIVE SOURCE
+  subgraph L1["Data Source"]
+    direction TB
+    SRC["📡 IBKR Live Data<br/><i>Prices & Options</i>"]:::source
+  end
+
+  %% ROW 3 — INGESTION
+  subgraph L2["Ingestion Jobs"]
+    direction LR
+    EOD["📊 eod_prices_daily_ibkr.py<br/><i>Fetch EOD Prices</i>"]:::service
+    SNAP["📋 ibkr_options_snapshot.py<br/><i>Fetch Options Chain</i>"]:::service
+  end
+
+  %% ROW 4 — STORAGE
+  subgraph L3["Live Databases"]
+    direction LR
+    DB_MAIN["💾 live_signals.duckdb<br/><i>EOD Prices & Features</i>"]:::db
+    DB_OPT["💾 option_chain_daily_snapshot.duckdb<br/><i>Options Snapshots</i>"]:::db
+  end
+
+  %% ROW 5 — FEATURES
+  subgraph L4["Feature Engineering"]
+    direction TB
+    FEAT["⚙️ price_features_live.py<br/><i>Generate Price Features</i>"]:::service
+  end
+
+  %% ROW 6 — MODELS & SIGNALS
+  subgraph L5["Models & Signals"]
+    direction LR
+    ENS["🤖 ENSEMBLE_ARTIFACTS_DIR<br/><i>Trained SPY Models</i>"]:::model
+    INF["🔮 ml_signal_inference.py<br/><i>Generate Live Signals</i>"]:::service
+  end
+
+  %% SEQUENTIAL FLOW (TOP → BOTTOM)
+
+  %% Orchestrator triggers all jobs in order
+  ORCH --> SRC
+  ORCH --> EOD
+  ORCH --> SNAP
+  ORCH --> FEAT
+  ORCH --> INF
+
+  %% Source → Ingestion
+  SRC --> EOD
+  SRC --> SNAP
+
+  %% Ingestion → Databases
+  EOD --> DB_MAIN
+  SNAP --> DB_OPT
+
+  %% DB_MAIN → Features → DB_MAIN
+  DB_MAIN --> FEAT --> DB_MAIN
+
+  %% Databases + Models → Inference
+  DB_MAIN --> INF
+  DB_OPT --> INF
+  ENS --> INF
+
+  %% Inference writes signals back
+  INF --> DB_MAIN
