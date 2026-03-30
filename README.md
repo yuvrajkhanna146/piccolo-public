@@ -170,18 +170,33 @@ results_df = add_signal_columns(results_df)
 
 ---
 
-## Results Summary
+### Results Summary
 
-> **TODO:** Fill in after completing the research notebooks.
+| Metric | Strategy | SPY B&H |
+|--------|----------|---------|
+| Backtest period | Feb 2015 – Feb 2026 | |
+| Total return | 3,138.6% | 241.4% |
+| Annualised return | 39.3% | 12.4% |
+| Sharpe ratio | 2.172 | 0.762 |
+| Max drawdown | −31.5% | −34.7% |
+| Win rate | 57.6% | 55.4% |
+| Profit factor | 1.707 | 1.157 |
+| Days in market | 58.4% | 100% |
 
-| Metric | Value |
-|--------|-------|
-| Backtest period | _paste_ |
-| Annualised return (strategy) | _paste_ |
-| Sharpe ratio | _paste_ |
-| Max drawdown | _paste_ |
-| Win rate | _paste_ |
-| SPY B&H return (same period) | _paste_ |
+**Sub-period performance:**
+
+| Period | Ann. Return | Sharpe | Max DD |
+|--------|-------------|--------|--------|
+| Pre-COVID (before 2020) | −2.1% | −0.120 | −25.7% |
+| COVID Crisis (2020) | 86.8% | 2.271 | −14.5% |
+| Recovery (2021–2022) | 35.4% | 2.057 | −9.1% |
+| Bear Market (2022) | 211.7% | 5.014 | −9.1% |
+| Bull (2023–present) | 80.1% | 4.541 | −7.2% |
+
+> **Note:** Results are from a frictionless backtest (no transaction costs or slippage).
+> The strategy's performance is concentrated in the post-2020 regime; pre-2020
+> returns were negative. See [04_backtest_performance.ipynb](notebooks/04_backtest_performance.ipynb)
+> for full analysis, robustness checks, and limitations.
 
 ---
 
