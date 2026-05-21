@@ -3,8 +3,9 @@
 **Systematic ML-driven options trading research using options market microstructure signals.**
 
 This repository contains the full research and production pipeline for
-**Piccolo**, a machine-learning strategy that uses options market microstructure
-signals to predict short-term directional bias in SPY and related ETFs.
+**Piccolo**, a machine-learning strategy that uses 13 options market microstructure
+features (GEX, IV skew, OI concentration, put/call ratios, max pain distance,
+ATM IV, DTE) to predict short-term directional bias in SPY and related ETFs.
 
 ---
 
