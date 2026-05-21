@@ -432,8 +432,6 @@ def run_snapshot(trade_date: date):
         for col in numeric_cols:
             df[col] = pd.to_numeric(df[col], errors="coerce")
 
-        print("DF dtypes before DuckDB:\n", df.dtypes)
-
         con = duckdb.connect(DUCKDB_PATH_LIVE_OPTIONS)
         con.execute(
             """

@@ -14,10 +14,10 @@ The high-level data and signal flow is documented in
 [`pipelines_flow.mmd`](pipelines_flow.mmd) (Mermaid diagram).  At a glance:
 
 ```
-IBKR API  ──►  EOD Prices (DuckDB LIVE)   ──►  Feature Engineering
-               Options Snapshots (LIVE)   ──►  Walk-Forward XGBoost
-                                               ──►  Ensemble Signal
-CBOE Historical Data  ──────────────────►          ──►  Backtest / Live
+Theta Data  ──►  EOD Prices (DuckDB LIVE)   ──►  Feature Engineering
+                 Options Snapshots (LIVE)   ──►  Walk-Forward XGBoost
+                                                 ──►  Ensemble Signal  ──►  Email
+CBOE Historical Data  ──────────────────►              ──►  Backtest
 ```
 
 ---
@@ -38,12 +38,17 @@ piccolo-public/
 ├── src/
 │   └── piccolo/
 │       ├── __init__.py
-│       ├── config_strategy.py        ← Strategy hyperparams (example values + docs)
-│       ├── config_live.py            ← Live trading symbol universe
-│       ├── ml_signal_engine.py       ← Feature loading, labels, walk-forward, ensemble
-│       ├── bootstrap_eod_prices_ibkr.py  ← One-time IBKR historical backfill
-│       ├── eod_prices_daily_ibkr.py      ← Nightly EOD price top-up
-│       └── ibkr_options_snapshot.py      ← Daily options chain capture
+│       ├── config_strategy.py            ← Strategy hyperparams (example values + docs)
+│       ├── config_live.py                ← Live trading symbol universe
+│       ├── ml_signal_engine.py           ← Feature loading, labels, walk-forward, ensemble
+│       ├── run_daily_pipeline.py         ← Daily pipeline orchestrator (Steps 1–4)
+│       ├── td_options_snapshot.py        ← Theta Data: daily options chain ingestion
+│       ├── eod_prices_td.py              ← Theta Data: EOD price ingestion
+│       ├── notify_email.py               ← Signal email notification (Gmail)
+│       └── legacy/                       ← IBKR-based scripts (superseded by Theta Data)
+│           ├── bootstrap_eod_prices_ibkr.py  ← One-time historical backfill
+│           ├── eod_prices_daily_ibkr.py      ← Nightly EOD price top-up
+│           └── ibkr_options_snapshot.py      ← Daily options chain capture
 │
 ├── notebooks/
 │   ├── README.md
@@ -86,23 +91,40 @@ cp .env.example .env
 # then edit .env with your DuckDB paths and IBKR connection details
 ```
 
-### 3. Bootstrap Historical Data
+### 3. Bootstrap Historical Data (IBKR users only)
+
+> **Theta Data users can skip this step** — `eod_prices_td.py` seeds 3 years of
+> price history automatically on first run.
 
 ```bash
-# One-time IBKR historical price backfill
-python src/piccolo/bootstrap_eod_prices_ibkr.py
-
-# Subsequent daily runs (e.g., via cron)
-python src/piccolo/eod_prices_daily_ibkr.py
+# One-time historical price backfill via IBKR
+python src/piccolo/legacy/bootstrap_eod_prices_ibkr.py
 ```
 
-### 4. Capture Options Snapshots
+### 4. Run the Daily Pipeline (Theta Data)
+
+With the Theta Data terminal running at `127.0.0.1:25503`, the full pipeline
+(options snapshot → EOD prices → model retraining → email notification) runs as:
 
 ```bash
-python src/piccolo/ibkr_options_snapshot.py
+python -m src.piccolo.run_daily_pipeline
 ```
 
-This requires an active IBKR TWS or IB Gateway session.
+Or run each step individually:
+
+```bash
+python -m src.piccolo.td_options_snapshot   # Step 1: options chain
+python -m src.piccolo.eod_prices_td         # Step 2: EOD prices
+python -m src.piccolo.ml_signal_engine      # Step 3: model retraining
+```
+
+**Legacy IBKR data scripts** (still functional, now superseded by Theta Data):
+
+```bash
+python src/piccolo/legacy/bootstrap_eod_prices_ibkr.py
+python src/piccolo/legacy/eod_prices_daily_ibkr.py
+python src/piccolo/legacy/ibkr_options_snapshot.py
+```
 
 ### 5. Explore the Research Notebooks
 
@@ -124,6 +146,7 @@ See [`notebooks/README.md`](notebooks/README.md) for details.
 | Storage | DuckDB (columnar, file-based) |
 | ML Framework | XGBoost (gradient boosted trees) |
 | Broker API | IBKR (Interactive Brokers) via `ibapi` |
+| Market data (live) | Theta Data terminal (options chain + EOD prices) |
 | Data (historical) | CBOE options data (14 years) |
 | Notebooks | Jupyter |
 | Visualisation | matplotlib, seaborn |

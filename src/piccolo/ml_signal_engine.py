@@ -22,6 +22,7 @@ from src.piccolo.config_strategy import (
     USE_FLAT_CLASS_FILTER,
     USE_ABOVE_SMA200_FILTER,
     USE_VOL_REGIME_FILTER,
+    ALPHA,
 )
 
 # Base feature list; filtered per feat_df in build_ml_table
@@ -154,7 +155,6 @@ def train_walkforward(ml_df: pd.DataFrame, feature_cols):
     ml_df["ym"] = ml_df["quote_date"].dt.to_period("M")
     all_months = sorted(ml_df["ym"].unique())
 
-    # DEBUG
     print("Total months in data:", len(all_months))
     print("Using N_TRAIN_MONTHS =", N_TRAIN_MONTHS, "N_TEST_MONTHS =", N_TEST_MONTHS)
 
@@ -217,7 +217,6 @@ def train_walkforward(ml_df: pd.DataFrame, feature_cols):
         results.append(test)
         fold_id += 1
 
-    # DEBUG
     print("Total folds trained:", len(fold_models))
     print("Total rows in results_df (before concat):", sum(len(r) for r in results))
 
@@ -230,7 +229,6 @@ def train_walkforward(ml_df: pd.DataFrame, feature_cols):
     all_fold_ids = sorted(fold_models.keys())
     K = len(all_fold_ids)
 
-    ALPHA = 0.7  # must match config_strategy.ALPHA and export_ensemble
     raw_weights = np.array([ALPHA ** (K - 1 - idx) for idx in range(K)])
     fold_weights = raw_weights / raw_weights.sum()
     fold_weight_map = {fid: w for fid, w in zip(all_fold_ids, fold_weights)}
@@ -322,7 +320,6 @@ def export_ensemble(
     # Recompute fold weights exactly as in train_walkforward
     all_fold_ids = sorted(fold_models.keys())
     K = len(all_fold_ids)
-    ALPHA = 0.7  # must match config_strategy.ALPHA and train_walkforward
     raw_weights = np.array([ALPHA ** (K - 1 - idx) for idx in range(K)])
     fold_weights = raw_weights / raw_weights.sum()
     fold_weight_map = {fid: float(w) for fid, w in zip(all_fold_ids, fold_weights)}

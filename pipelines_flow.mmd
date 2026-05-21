@@ -12,14 +12,14 @@ flowchart TB
   %% ROW 2 — LIVE SOURCE
   subgraph L1["Data Source"]
     direction TB
-    SRC["📡 IBKR Live Data<br/><i>Prices & Options</i>"]:::source
+    SRC["📡 Theta Data Terminal<br/><i>127.0.0.1:25503</i>"]:::source
   end
 
   %% ROW 3 — INGESTION
   subgraph L2["Ingestion Jobs"]
     direction LR
-    EOD["📊 eod_prices_daily_ibkr.py<br/><i>Fetch EOD Prices</i>"]:::service
-    SNAP["📋 ibkr_options_snapshot.py<br/><i>Fetch Options Chain</i>"]:::service
+    EOD["📊 eod_prices_td.py<br/><i>Fetch EOD Prices</i>"]:::service
+    SNAP["📋 td_options_snapshot.py<br/><i>Fetch Options Chain</i>"]:::service
   end
 
   %% ROW 4 — STORAGE
@@ -42,6 +42,12 @@ flowchart TB
     INF["🔮 ml_signal_inference.py<br/><i>Generate Live Signals</i>"]:::service
   end
 
+  %% ROW 7 — NOTIFICATION
+  subgraph L6["Notification"]
+    direction TB
+    EMAIL["✉️ notify_email.py<br/><i>Email Signal Report</i>"]:::service
+  end
+
   %% SEQUENTIAL FLOW (TOP → BOTTOM)
 
   %% Orchestrator triggers all jobs in order
@@ -50,6 +56,7 @@ flowchart TB
   ORCH --> SNAP
   ORCH --> FEAT
   ORCH --> INF
+  ORCH --> EMAIL
 
   %% Source → Ingestion
   SRC --> EOD
@@ -69,3 +76,6 @@ flowchart TB
 
   %% Inference writes signals back
   INF --> DB_MAIN
+
+  %% Signals → Email
+  DB_MAIN --> EMAIL
