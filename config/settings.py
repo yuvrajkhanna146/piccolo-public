@@ -34,11 +34,11 @@ RAW_IBKR_PATH = os.getenv("RAW_IBKR_PATH")
 RAW_CBOE_PATH = os.getenv("RAW_CBOE_PATH")
 
 # Live DuckDB for daily EOD prices and signals.
-# Written to by eod_prices_daily_ibkr.py; read by ml_signal_inference.py.
+# Written to by eod_prices_td.py; read by ml_signal_inference.py.
 DUCKDB_PATH_LIVE = os.getenv("DUCKDB_PATH_LIVE")
 
-# Live options-chain DuckDB for intraday/daily snapshots.
-# Written to by ibkr_options_snapshot.py; stores per-trade-date option chains
+# Live options-chain DuckDB for daily snapshots.
+# Written to by td_options_snapshot.py; stores per-trade-date option chains
 # used for live ML feature generation.
 DUCKDB_PATH_LIVE_OPTIONS = os.getenv("DUCKDB_PATH_LIVE_OPTIONS")
 
