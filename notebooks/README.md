@@ -51,7 +51,7 @@ jupyter notebook
 | # | Notebook | What it covers |
 |---|----------|----------------|
 | 0 | [00_experiment_plan.ipynb](00_experiment_plan.ipynb) | Research question, hypotheses, methodology overview, pipeline diagram |
-| 1 | [01_data_pipeline.ipynb](01_data_pipeline.ipynb) | IBKR + CBOE ingestion, DuckDB schema, data quality checks, sample visualisations |
+| 1 | [01_data_pipeline.ipynb](01_data_pipeline.ipynb) | Theta Data + CBOE ingestion, DuckDB schema, data quality checks, sample visualisations |
 | 2 | [02_feature_engineering.ipynb](02_feature_engineering.ipynb) | Feature construction, distributions, correlation matrix, label building, class balance |
 | 3 | [03_model_training_walkforward.ipynb](03_model_training_walkforward.ipynb) | Walk-forward XGBoost, per-fold metrics, exponential ensemble, confidence threshold tuning |
 | 4 | [04_backtest_performance.ipynb](04_backtest_performance.ipynb) | Equity curve vs SPY, Sharpe/drawdown/win rate, monthly heatmap, regime impact, robustness |

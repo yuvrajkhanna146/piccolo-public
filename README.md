@@ -76,12 +76,11 @@ cd piccolo-public
 python -m venv .venv
 source .venv/bin/activate      # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-
-ibapi (IBKR Python API) is not on PyPI — download the installer from:
-https://interactivebrokers.github.io/
-then: pip install <path-to-ibapi-wheel>
-
 ```
+
+> **Legacy IBKR users only:** `ibapi` is not on PyPI. Download from
+> https://interactivebrokers.github.io/ and install the wheel manually.
+> Not required for the Theta Data pipeline.
 
 ### 2. Configure Environment Variables
 
@@ -89,7 +88,7 @@ Copy `.env.example` to `.env` and fill in your local paths:
 
 ```bash
 cp .env.example .env
-# then edit .env with your DuckDB paths and IBKR connection details
+# then edit .env with your DuckDB paths and connection details
 ```
 
 ### 3. Bootstrap Historical Data (IBKR users only)
@@ -146,8 +145,8 @@ See [`notebooks/README.md`](notebooks/README.md) for details.
 | Language | Python 3.10+ |
 | Storage | DuckDB (columnar, file-based) |
 | ML Framework | XGBoost (gradient boosted trees) |
-| Broker API | IBKR (Interactive Brokers) via `ibapi` |
 | Market data (live) | Theta Data terminal (options chain + EOD prices) |
+| Data ingestion (legacy) | IBKR (Interactive Brokers) via `ibapi` — superseded by Theta Data |
 | Data (historical) | CBOE options data (14 years) |
 | Notebooks | Jupyter |
 | Visualisation | matplotlib, seaborn |
