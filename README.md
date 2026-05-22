@@ -42,6 +42,7 @@ piccolo-public/
 │       ├── config_strategy.py            ← Strategy hyperparams (example values + docs)
 │       ├── config_live.py                ← Live trading symbol universe
 │       ├── ml_signal_engine.py           ← Feature loading, labels, walk-forward, ensemble
+│       ├── ml_signal_inference.py        ← Load saved ensemble → write signal to live_signals
 │       ├── run_daily_pipeline.py         ← Daily pipeline orchestrator (Steps 1–4)
 │       ├── td_options_snapshot.py        ← Theta Data: daily options chain ingestion
 │       ├── eod_prices_td.py              ← Theta Data: EOD price ingestion
@@ -113,9 +114,10 @@ python -m src.piccolo.run_daily_pipeline
 Or run each step individually:
 
 ```bash
-python -m src.piccolo.td_options_snapshot   # Step 1: options chain
-python -m src.piccolo.eod_prices_td         # Step 2: EOD prices
-python -m src.piccolo.ml_signal_engine      # Step 3: model retraining
+python -m src.piccolo.td_options_snapshot    # Step 1: options chain
+python -m src.piccolo.eod_prices_td          # Step 2: EOD prices
+python -m src.piccolo.ml_signal_engine       # Step 3a: model retraining
+python -m src.piccolo.ml_signal_inference    # Step 3b: inference → live_signals
 ```
 
 **Legacy IBKR data scripts** (still functional, now superseded by Theta Data):

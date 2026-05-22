@@ -3,10 +3,11 @@
 Daily pipeline orchestrator — runs all four steps in sequence.
 
 Steps:
-  1. Options snapshot   → option_chains table  (DUCKDB_PATH_LIVE_OPTIONS)
-  2. EOD prices         → eod_prices table     (DUCKDB_PATH_LIVE)
-  3. ML model retraining  → ensemble artifacts updated
-  4. Email notification  → signals Excel sent to EMAIL_RECIPIENT
+  1. Options snapshot      → option_chains table  (DUCKDB_PATH_LIVE_OPTIONS)
+  2. EOD prices            → eod_prices table     (DUCKDB_PATH_LIVE)
+  3. ML signal generation  → retrain ensemble artifacts, then write today's
+                             signal to live_signals (DUCKDB_PATH_LIVE)
+  4. Email notification    → signals Excel sent to EMAIL_RECIPIENT
 
 Run manually or via scheduler (cron / Task Scheduler / launchd):
 
@@ -47,9 +48,12 @@ def main() -> None:
     subprocess.check_call([python, "-m", "src.piccolo.eod_prices_td"])
 
     print("\n" + "=" * 60)
-    print("  STEP 3: ML Model Retraining")
+    print("  STEP 3: ML Signal Generation")
     print("=" * 60)
+    print("  3a — Retraining ensemble ...")
     subprocess.check_call([python, "-m", "src.piccolo.ml_signal_engine"])
+    print("  3b — Running inference ...")
+    subprocess.check_call([python, "-m", "src.piccolo.ml_signal_inference"])
 
     print("\n" + "=" * 60)
     print("  STEP 4: Email Notification")
