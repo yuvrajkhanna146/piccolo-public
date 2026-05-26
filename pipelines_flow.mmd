@@ -25,21 +25,22 @@ flowchart TB
   %% ROW 4 — STORAGE
   subgraph L3["Live Databases"]
     direction LR
-    DB_MAIN["💾 live_signals.duckdb<br/><i>EOD Prices & Features</i>"]:::db
-    DB_OPT["💾 option_chain_daily_snapshot.duckdb<br/><i>Options Snapshots</i>"]:::db
+    DB_LIVE["💾 DUCKDB_PATH_LIVE<br/><i>EOD Prices + Live Signals</i>"]:::db
+    DB_OPT["💾 DUCKDB_PATH_LIVE_OPTIONS<br/><i>Options Chain Snapshots</i>"]:::db
   end
 
-  %% ROW 5 — FEATURES
-  subgraph L4["Feature Engineering"]
+  %% ROW 5 — HISTORICAL FEATURES (pre-built from CBOE data via notebooks)
+  subgraph L4["Historical Feature Store"]
     direction TB
-    FEAT["⚙️ price_features_live.py<br/><i>Generate Price Features</i>"]:::service
+    DB_HIST["💾 DUCKDB_PATH_HIST<br/><i>features_spy_latest<br/>(CBOE historical + options-derived)</i>"]:::db
   end
 
-  %% ROW 6 — MODELS & SIGNALS
+  %% ROW 6 — TRAINING & INFERENCE
   subgraph L5["Models & Signals"]
     direction LR
+    TRAIN["⚙️ ml_signal_engine.py<br/><i>Walk-Forward Retrain</i>"]:::service
     ENS["🤖 ENSEMBLE_ARTIFACTS_DIR<br/><i>Trained SPY Models</i>"]:::model
-    INF["🔮 ml_signal_inference.py<br/><i>Generate Live Signals</i>"]:::service
+    INF["🔮 ml_signal_inference.py<br/><i>Generate Live Signal</i>"]:::service
   end
 
   %% ROW 7 — NOTIFICATION
@@ -48,34 +49,34 @@ flowchart TB
     EMAIL["✉️ notify_email.py<br/><i>Email Signal Report</i>"]:::service
   end
 
-  %% SEQUENTIAL FLOW (TOP → BOTTOM)
+  %% SEQUENTIAL FLOW (TOP -> BOTTOM)
 
-  %% Orchestrator triggers all jobs in order
+  %% Orchestrator triggers pipeline steps in order
   ORCH --> SRC
   ORCH --> EOD
   ORCH --> SNAP
-  ORCH --> FEAT
+  ORCH --> TRAIN
   ORCH --> INF
   ORCH --> EMAIL
 
-  %% Source → Ingestion
+  %% Source -> Ingestion
   SRC --> EOD
   SRC --> SNAP
 
-  %% Ingestion → Databases
-  EOD --> DB_MAIN
+  %% Ingestion -> Live Databases
+  EOD --> DB_LIVE
   SNAP --> DB_OPT
 
-  %% DB_MAIN → Features → DB_MAIN
-  DB_MAIN --> FEAT --> DB_MAIN
+  %% Historical features -> Training and Inference
+  DB_HIST --> TRAIN
+  DB_HIST --> INF
 
-  %% Databases + Models → Inference
-  DB_MAIN --> INF
-  DB_OPT --> INF
+  %% Training -> Ensemble Artifacts -> Inference
+  TRAIN --> ENS
   ENS --> INF
 
-  %% Inference writes signals back
-  INF --> DB_MAIN
+  %% Inference writes signal back to live DB
+  INF --> DB_LIVE
 
-  %% Signals → Email
-  DB_MAIN --> EMAIL
+  %% Live signals -> Email
+  DB_LIVE --> EMAIL
