@@ -133,7 +133,7 @@ def send(trade_date: date) -> None:
     save_path = os.path.join(SIGNALS_OUTPUT_DIR, f'piccolo_signals_{trade_date}.xlsx')
     with open(save_path, 'wb') as f:
         f.write(excel)
-    print(f'Signals saved → {save_path}')
+    print(f'Signals saved -> {save_path}')
 
     # Build email
     msg = MIMEMultipart()
@@ -161,7 +161,7 @@ def send(trade_date: date) -> None:
         smtp.login(SENDER, SMTP_PASS)
         smtp.sendmail(SENDER, RECIPIENT, msg.as_string())
 
-    print(f'Email sent → {RECIPIENT}')
+    print(f'Email sent -> {RECIPIENT}')
 
 
 if __name__ == '__main__':
