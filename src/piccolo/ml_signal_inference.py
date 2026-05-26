@@ -185,7 +185,7 @@ def run_inference(trade_date: Optional[date] = None) -> None:
     con.execute("INSERT INTO live_signals SELECT * FROM signal_df")
     con.close()
 
-    print(f"  Written to live_signals → {signal_date} | {SYMBOL} | {label}")
+    print(f"  Written to live_signals -> {signal_date} | {SYMBOL} | {label}")
 
 
 if __name__ == "__main__":

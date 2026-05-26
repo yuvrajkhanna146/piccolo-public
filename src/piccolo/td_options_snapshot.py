@@ -285,7 +285,7 @@ def save_to_duckdb(all_results: list[dict], trade_date: date) -> None:
         FROM df
     """)
     con.close()
-    print(f'Saved {len(df)} rows → {DUCKDB_PATH_LIVE_OPTIONS} for {trade_date}')
+    print(f'Saved {len(df)} rows -> {DUCKDB_PATH_LIVE_OPTIONS} for {trade_date}')
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

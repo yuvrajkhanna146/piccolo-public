@@ -141,7 +141,7 @@ def backfill_prices_until_yesterday() -> None:
         rows = fetch_eod_range(symbol, start_dt, yesterday)
 
         if not rows:
-            print(f'{symbol}: no data returned for {start_dt} → {yesterday}')
+            print(f'{symbol}: no data returned for {start_dt} -> {yesterday}')
             continue
 
         df = pd.DataFrame(rows)
@@ -162,7 +162,7 @@ def backfill_prices_until_yesterday() -> None:
         con.close()
 
         print(f'{symbol}: added {len(df)} rows  '
-              f'[{df["quote_date"].min().date()} → {df["quote_date"].max().date()}]')
+              f'[{df["quote_date"].min().date()} -> {df["quote_date"].max().date()}]')
 
 
 if __name__ == '__main__':
