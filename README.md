@@ -15,11 +15,28 @@ The high-level data and signal flow is documented in
 [`pipelines_flow.mmd`](pipelines_flow.mmd) (Mermaid diagram).  At a glance:
 
 ```
-Theta Data  ──►  EOD Prices (DuckDB LIVE)   ──►  Feature Engineering
-                 Options Snapshots (LIVE)   ──►  Walk-Forward XGBoost
-                                                 ──►  Ensemble Signal  ──►  Email
-CBOE Historical Data  ──────────────────►              ──►  Backtest
+CBOE Historical Data (14 years)  ──►  Feature Store (DuckDB HIST)  ──┐
+                                                                       ▼
+Theta Data Terminal  ──►  EOD Prices + Options Snapshots  ──►  Walk-Forward XGBoost
+                                                                       │
+                                                          ┌────────────┴────────────┐
+                                                          ▼                         ▼
+                                                   Ensemble Signal ──► Email     Backtest
 ```
+
+---
+
+## Methodology
+
+Four design decisions separate this from a standard ML backtest:
+
+- **Walk-forward validation with exponential recency weighting.** The model is never evaluated on data it was trained on. Each fold trains on a rolling window and tests on the next period, advancing forward in time. Fold weights decay exponentially — more recent folds carry higher weight in the ensemble. This reflects the reality that market regimes shift and older folds become less informative over time.
+
+- **Path-forward labels, not next-day returns.** A row is labelled Up only if price actually reached the Up threshold *at any point* during the forward window, not just on day N. This avoids mislabelling choppy days where price momentarily crosses a threshold and immediately reverses — a common source of noise in naive label construction.
+
+- **Options market microstructure features.** All 13 active features are derived from the options chain: GEX, IV skew, OI concentration, put/call ratios, max pain distance, ATM IV, DTE. These capture dealer hedging flows and market-maker positioning that tend to precede price movement — a fundamentally different signal source from the lagged price transforms most ML-on-equity approaches rely on.
+
+- **Reproducible, auditable artifacts.** Trained models are saved as XGBoost JSON + NumPy `.npz` scalers — no pickle. The artifacts are human-readable, version-controllable, and loadable without matching library versions.
 
 ---
 
